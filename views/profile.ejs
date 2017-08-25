@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="stylesheet/inside.css">
+    <style type="text/css">
+        body {
+            text-align: center;
+        }
+	
+        img{
+        	border-radius: 40px;
+        	width: 200px;
+        	height: auto;
+        }
+        img#rating{
+        	width:auto;
+        }
+        .container{
+            width: 100%
+        }
+         .navbar-brand {
+            padding: 10px 10px;
+        }
+
+        .navbar-brand>img{
+            height: 100%;
+            width: auto;
+        }
+    </style>
+	<title></title>
+</head>
+<body>
+	<% include stuff/nav.ejs %>
+	<div class="login-page">
+		<div class="form">
+				<p><img src='<%=foundUser.image%>'><h4><span><%=foundUser.username%></span></h4></p>
+
+				<p><strong>Usuário</strong>:<%=foundUser.nome%></p>
+				<p><img id='rating'src='https://cdn3.iconfinder.com/data/icons/travel-and-vacation-2-5/32/five_stars_high_rating_hotel_stay-128.png'></p>
+				<a href="perfil/edit"><button class="btn btn-lg btn-primary btn-block">Editar</button></a>
+		</div>
+	</div>
+
+</body>
+</html>
+
+

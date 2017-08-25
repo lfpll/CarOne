@@ -1,0 +1,37 @@
+{
+  "name": "carone",
+  "version": "1.0.0",
+  "main": "app.js",
+  "engines": {
+    "node": "4.*"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "author": "Luiz Fernando Lobo",
+  "license": "ISC",
+  "dependencies": {
+    "@google/maps": "^0.3.1",
+    "body-parser": "^1.17.1",
+    "cookie-parser": "^1.4.3",
+    "ejs": "^2.5.6",
+    "express": "^4.15.2",
+    "express-session": "^1.15.1",
+    "express-sessions": "^1.0.6",
+    "method-override": "^2.3.8",
+    "mongoose": "^4.9.1",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^4.0.0",
+    "request": "^2.81.0",
+    "session-memory-store": "^0.2.2"
+  },
+  
+  "repository": {
+    "type": "git",
+    "url": "git+https://luizfpll@bitbucket.org/projectgym/gym.project.git"
+  },
+  "homepage": "https://bitbucket.org/projectgym/gym.project#readme",
+  "description": ""
+}

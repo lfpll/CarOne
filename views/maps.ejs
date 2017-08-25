@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CarOne</title>
+
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    
+    <!-- Load Bootstrap -->    
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+   
+    <link rel="stylesheet" href="stylesheet/inside.css">
+    <style>
+        body {
+            text-align: center
+        }
+
+        p {
+            text-align: center
+        }
+
+
+        .passengerImage {
+            border: 1px solid #f5f5f5;
+            border-radius: 150px !important;
+            height: 75px;
+            padding: 3px;
+            width: 75px;
+        }
+
+        ul {
+            margin-left: -33px
+        }	
+
+        form {
+            padding: 50 px
+        }
+    </style>
+</head>
+
+<body>
+    <% include ../views/stuff/nav.ejs%>
+
+        <div id="routeData">
+            <div class="login-page">
+                <div class="form">
+                    <h4> Bem Vindo ao CarOne</h4>
+			<h4>Faça sua Rota</h4>
+
+                    <p><input placeholder="Origem" type="text" id="origin"></p>
+                    <p><input placeholder="Destino" type="text" id="destination"></p>
+                    <p><button id="submit1" type="submit">Procurar caroneiros</button></p>
+                </div>
+            </div>
+        </div>
+        <div id="popup">
+
+
+        </div>
+
+        <script type="text/javascript">
+            
+
+            function initMap() {
+                var directionsDisplay = new google.maps.DirectionsRenderer;
+                var directionsService = new google.maps.DirectionsService;
+                //To be Optimized
+                var input1 = /** @type {!HTMLInputElement} */ (
+                    document.getElementById('origin'));
+                var input2 = /** @type {!HTMLInputElement} */ (
+                    document.getElementById('destination'));
+                //===================
+                var autocomplete1 = new google.maps.places.Autocomplete(input1);
+                var autocomplete2 = new google.maps.places.Autocomplete(input2);
+                document.getElementById('submit1').addEventListener('click', function() {
+                    origin = document.getElementById('origin').value
+                    destination = document.getElementById('destination').value
+
+                    calculateAndDisplayRoute(directionsService, origin, destination);
+                });
+
+            };
+
+            function calculateAndDisplayRoute(directionsService, origin, destination) {
+                // Retrieve the start and end locations and create a DirectionsRequest
+                directionsService.route({
+                    origin: origin,
+                    destination: destination,
+                    travelMode: 'DRIVING'
+                }, function(response, status) { // Get the Route respone
+                    if (status === 'OK') {
+//ShowSteps -Responsable for the most number of latlongs possible to future distance comparison
+                        showSteps(response);
+                    } else {
+                        window.alert('Directions request failed due to ' + status);
+                    };
+                });
+            };
+
+            function showSteps(directionResult) {
+                var routeSend = [];
+                //Pick the distance from the route and the path in lat,longs
+                var myRoute = directionResult.routes[0].legs[0]
+                var distance = directionResult.routes[0].legs[0].distance
+
+                //Take the cordiantes of the route
+                for (var i = 0; i < myRoute.steps.length; i++) {
+                    //Create a array and add de lat,long's
+                    myRoute.steps[i].path.forEach(function(path) {
+
+                        cord = {
+                            'lat': path.lat(),
+                            'lng': path.lng()
+                        };
+                        routeSend.push(cord);
+                    });
+                    var routeSendWithTime = {
+                        'cords': routeSend
+                    };
+                };
+                //Send the post request of the cordinates of the route
+                //Get the 10 nearest users from the driver route as the name passengerList
+                $.post('/userMap', {
+                    data: JSON.stringify(routeSendWithTime),
+                    dataType: "json",
+                }).done(function(passengerList) {
+//Delete the page and create a new one with a form with the 10 nearest users who want's rides
+                    OnloadFunction(passengerList)
+                    function OnloadFunction(passengerList) {
+                        var i = 0
+                        $('#routeData').remove()
+                        $("#popup").append(
+                            '<div class="login-page"><div class="form"><form"><ul id="listaUsers"></ul><button style="margin:4px;margin-bottom:10px"id="submit2" class="btn btn-success" type="submit">Chamar caroneiros</button><p></p></form></div></div>')
+                        passengerList.forEach(function(data) {
+                            $("#listaUsers").append('<h3>' + data.username + '</h3><img class="passengerImage" style="width:auto;height:150px;" src=' + data.image + '><h4>Esta à ' + data.distance + '  metros da sua rota</h4></li><li class="userId" id="user' + i + '"style="display:none">' + data._id + '</li><p><span class="button-checkbox"><button type="button" class="btn" data-color="primary" id="checkbox' + i + '">Dar Carona </button><input class="hidden "id="checkbox' + i + '"type="checkbox"></input></span></p>')
+                            i++
+                        })
+//Script - 
+//Make the sprite of the checkbox works
+//Limit the number of checked checkboxes(number of passengers)
+//Make the button with id submit2 works(form button)
+//Change the id of the user in the form when checkbox checked for future passing to backend***** - limited for 10 users because of regexp
+                        $.getScript("test.js", function() {});
+                        $.getScript("button.js", function() {});
+                    };
+                });
+            }
+
+        </script>
+
+
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDeXq-N64_5QV0oxHJlsskwJZAVUU8YSaU&libraries=places&callback=initMap" async defer>
+        </script>
+</body>
+
+</html>

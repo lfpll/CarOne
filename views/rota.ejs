@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Partiu!</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+
+    <!-- Load Bootstrap -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+      <script src="https://github.com/googlemaps/js-rich-marker/blob/gh-pages/src/richmarker.js"></script>
+
+
+    <style>
+        #wrapper {
+            position: relative;
+        }
+
+        #over_map {
+            position: absolute;
+            top: 70%;
+            left: 50%;
+            z-index: 1;
+            text-align: center
+        }
+         .image-marker{
+            border-radius:5px;
+    
+        }
+    </style>
+    <script type="text/javascript">
+        var map,
+            currentPositionMarker,
+            mapCenter = '<%=driverPassCords.origin%>';
+
+        function initializeMap() {
+            var geocoder = new google.maps.Geocoder();
+            var directionsService = new google.maps.DirectionsService;
+            directionsDisplay = new google.maps.DirectionsRenderer
+            map = new google.maps.Map(document.getElementById('map_canvas'), {
+                zoom: 10,
+                center: mapCenter,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            });
+            directionsDisplay.setMap(map);
+            calculateAndDisplayRoute(directionsService, directionsDisplay);
+            //Place the users images at the map
+            function populateMarker() {
+                var image = []
+                var waypoints = []
+                var content = []
+                <%driverPassCords.waypoints.forEach(function(passCord){%>
+                waypoints.push({
+                    lat: <%=passCord.location.lat%>,
+                    lng: <%=passCord.location.lng%>
+                })
+                <%})%>
+                <%driverPassCords.images.forEach(function(passCord){%>
+                var icon = {
+                    url: "<%=passCord.image%>", // url
+                    scaledSize: new google.maps.Size(50, 40),
+                    content: '<div class="image-marker"><%=passCord.username%></div>' // scaled size
+                };
+                image.push(icon)
+                <%})%>
+                for (i = 0; i < waypoints.length; i++) {
+                    marker(waypoints[i], image[i],content[i])
+                }
+            }
+            //Create a marker at the map
+            function marker(position, icon,content) {
+                 var marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    icon: icon,
+                    zIndex: google.maps.Marker.MAX_ZINDEX + 1
+                })
+            }
+            populateMarker()
+        }
+        //Create the path with the data from the backend
+        function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+            // Retrieve the start and end locations and create a DirectionsRequest using
+            directionsService.route({
+                    origin: '<%=driverPassCords.origin%>',
+                    destination: '<%=driverPassCords.destination%>',
+                    travelMode: 'DRIVING',
+                    waypoints: [<%driverPassCords.waypoints.forEach(function(passCord){%> {
+                        location: new google.maps.LatLng(<%=passCord.location.lat%>, <%=passCord.location.lng%>),
+                        stopover: true
+                    }, <%})%>]
+                },
+                function(response, status) { // Get the Route respone
+                    if (status === 'OK') {
+                        directionsDisplay.setDirections(response);
+                    } else {
+                        window.alert('Directions request failed due to ' + status);
+                    };
+                });
+
+
+        };
+
+        //Functionalities to make the geolocation works
+        //===FUTURE USE -> ALERT THE USER THAT HE ARRIVED AND PASS TO THE BACKEND TO ADVISE THE PASSENGERS
+
+        function locError(error) {
+            // the current position could not be located
+            alert("The current position could not be found!");
+        }
+
+        function setCurrentPosition(pos) {
+            currentPositionMarker = new google.maps.Marker({
+                map: map,
+                position: new google.maps.LatLng(
+                    pos.coords.latitude,
+                    pos.coords.longitude
+                ),
+                title: "Current Position"
+            });
+            map.panTo(new google.maps.LatLng(
+                pos.coords.latitude,
+                pos.coords.longitude
+            ));
+        }
+
+        function displayAndWatch(position) {
+            // set current position
+            setCurrentPosition(position);
+            // watch position
+            watchCurrentPosition();
+        }
+
+        function watchCurrentPosition() {
+            var positionTimer = navigator.geolocation.watchPosition(
+                function(position) {
+                    setMarkerPosition(
+                        currentPositionMarker,
+                        position
+                    );
+                });
+        }
+
+        function setMarkerPosition(marker, position) {
+            marker.setPosition(
+                new google.maps.LatLng(
+                    position.coords.latitude,
+                    position.coords.longitude)
+            );
+        }
+
+        function initLocationProcedure() {
+            initializeMap();
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(displayAndWatch, locError);
+            } else {
+                alert("Your browser does not support the Geolocation API");
+            }
+        }
+    </script>
+
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="map_canvas" style="height:600px;">
+
+        </div>
+
+        <div id="over_map">
+        <!-- Button of arriving -->
+          <button id="inputThanks" class="btn btn-success" type="submit">Chegamos!</button>
+        </div>
+    </div>
+
+    <script type='text/javascript'>
+    //Jquery script of the post to finish the rac
+     function deletePage(){
+            var url = window.location.href;
+            var id = url.substring(url.lastIndexOf('#') + 1);
+            $.post({
+                url: +id
+            }).done(function(data) {
+                window.location = '/thanks';
+            });
+        }
+        $('#inputThanks').on('click', function() {
+           
+        deletePage();
+        })
+
+    </script>
+</body>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDeXq-N64_5QV0oxHJlsskwJZAVUU8YSaU&libraries=places&callback=initLocationProcedure" async defer></script>
+
+</html>

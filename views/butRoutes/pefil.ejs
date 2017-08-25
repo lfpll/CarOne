@@ -1,0 +1,17 @@
+<!-- User PAGE -->
+
+<ul>
+	<li><%= User.name%></li>
+	<li><%= User.age%></li>
+	<li><%= User.image%></li>
+	<% User.friends.forEach(friend){ %>
+	<li><%= friend.username%></li>
+	<li><%= friend.image%></li>
+	<% } %>
+	<ul>
+		<% User.comments.forEach(comment){ %>
+		<li><%= comment.username%></li>
+		<li><%= comment.text%></li>
+	<% } %>
+	</ul>
+</ul>
